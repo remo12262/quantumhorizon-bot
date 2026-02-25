@@ -1,24 +1,30 @@
 import express from "express";
+import cors from "cors";
 
 const app = express();
 
+// CORS: permette chiamate dal tuo sito
+app.use(cors({
+  origin: ["https://www.quantumhorizon.it", "https://quantumhorizon.it"],
+  methods: ["GET", "POST", "OPTIONS"],
+  allowedHeaders: ["Content-Type"]
+}));
+
+// Rispondi sempre alle preflight OPTIONS
+app.options("*", cors());
+
+app.use(express.json());
+
+// Health check
 app.get("/", (req, res) => {
   res.send("OK");
 });
 
+// Chat endpoint
 app.post("/api/chat", (req, res) => {
-  res.json({ reply: "Bot attivo (test)" });
+  const { message } = req.body || {};
+  res.json({ reply: `Bot attivo (test): ${message || ""}` });
 });
 
 const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-  console.log("Listening on port " + PORT);
-});
-app.use((req, res, next) => {
-  res.setHeader("Access-Control-Allow-Origin", "https://www.quantumhorizon.it");
-  res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-  if (req.method === "OPTIONS") return res.sendStatus(200);
-  next();
-});
+app.listen(PORT, () => console.log("Listening on port " + PORT));
